@@ -16,3 +16,22 @@ The following machines are being configured:
 3. Rebuild
     ```cd /etc/nixos && nix run nix-darwin/master#darwin-rebuild -- switch --flake .#<host_name>```
 
+## Structure
+
+```
+root
+|-- modules
+    |-- shared
+        |-- nixos
+        |-- darwin
+    |-- hosts
+        |-- malenia
+        |-- miquella
+        |-- solaire
+    |-- home-manager
+        |-- shared
+        |-- hosts
+            |-- malenia
+            |-- miquella
+            |-- solaire
+```

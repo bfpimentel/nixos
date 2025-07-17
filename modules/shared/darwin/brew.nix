@@ -62,9 +62,7 @@
 
       { name = "font-space-mono-nerd-font"; greedy = true; }
       { name = "font-maple-mono-nf"; greedy = true; }
-      # { name = "sf-symbols"; greedy = true; }
-      # { name = "font-sf-pro"; greedy = true; }
-      # { name = "font-sf-mono"; greedy = true; }
+      { name = "font-sf-mono-nerd-font-ligaturized"; greedy = true; }
       # { name = "font-sketchybar-app-font"; greedy = true; }
     ];
   };

@@ -4,14 +4,14 @@ shell-integration-features = cursor,title,sudo
 # theme = rose-pine-moon
 config-file = colors
 
-font-family = "Maple Mono NF"
+font-family = "Liga SFMono Nerd Font"
 font-size = 14
 # font-feature = -calt
 # font-feature = -liga
 # font-feature = -dlig
 
-adjust-cell-height = 0%
-adjust-cursor-height = 0%
+adjust-cell-height = 20%
+adjust-cursor-height = 20%
 
 window-padding-x = 1
 window-padding-y = 0

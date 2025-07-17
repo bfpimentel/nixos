@@ -29,6 +29,8 @@
       vscode-langservers-extracted
       prettierd
 
+      gopls
+
       nil
       nixfmt-rfc-style
     ];

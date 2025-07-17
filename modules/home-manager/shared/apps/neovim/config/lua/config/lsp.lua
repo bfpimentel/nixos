@@ -1,4 +1,5 @@
 vim.lsp.enable({
+  "go",
   "json",
   "lua",
   "nix",
