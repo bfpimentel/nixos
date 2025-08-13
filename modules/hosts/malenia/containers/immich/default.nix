@@ -9,7 +9,7 @@
 
 with lib;
 let
-  immichVersion = "v1.136.0";
+  immichVersion = "v1.137.3";
 
   immichPaths =
     let
@@ -58,7 +58,7 @@ in
           "immich-machine-learning"
         ];
         networks = [ "local" ];
-        volumes = [ "${immichPaths.mounts.photos}:/usr/src/app/upload" ];
+        volumes = [ "${immichPaths.mounts.photos}:/data" ];
         environmentFiles = [ config.age.secrets.immich.path ];
         environment = {
           PUID = puid;
