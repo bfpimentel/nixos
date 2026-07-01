@@ -21,33 +21,7 @@ sortOrders = []
     [[catalogs.globalScopes]]
     catalogIdentifier = 'TunaCore.ApplicationsCatalog'
     mode = 'some'
-    selectedItemKeys = [
-        'About This Mac',
-        'Activity Monitor',
-        'AeroSpace',
-        'Applications',
-        'BetterCapture',
-        'Bruno',
-        'Calculator',
-        'Codex',
-        'Finder',
-        'Font Book',
-        'Helium',
-        'Hidden Bar',
-        'Itau',
-        'Kap',
-        'LM Studio',
-        'Notes',
-        'Safari',
-        'Screenshot',
-        'Simulator',
-        'Tuna',
-        'Vial',
-        'WireGuard',
-        'Xcode-26.5.0',
-        'Xcodes',
-        'kitty'
-    ]
+    selectedItemKeys = [ 'Applications', 'Dory', 'Kap', 'LM Studio' ]
 
     [[catalogs.globalScopes]]
     catalogIdentifier = 'TunaEmoji.EmojiCatalog'

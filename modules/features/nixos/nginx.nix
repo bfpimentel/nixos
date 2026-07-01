@@ -60,7 +60,9 @@ in
             # Local
             "bap-server.${acmeHost}" = mkLocalProxyHost 6223;
             "bap.${acmeHost}" = mkLocalProxyHost 6224;
+            "books.${acmeHost}" = mkLocalProxyHost 8083;
             "dash.${acmeHost}" = mkLocalProxyHost 7112;
+            "dav.${acmeHost}" = mkLocalProxyHost 7116;
             "drip.${acmeHost}" = mkLocalProxyHost 7123;
             "hass-sync.${acmeHost}" = mkLocalProxyHost 8334;
             "hass.${acmeHost}" = mkLocalProxyHost 8333;
@@ -68,7 +70,6 @@ in
             "jobs.${acmeHost}" = mkLocalProxyHost 3005;
             "logs.${acmeHost}" = mkLocalProxyHost 7113;
             "media.${acmeHost}" = mkLocalProxyHost 8096;
-            "n8n.${acmeHost}" = mkLocalProxyHost 5678;
             "photos.${acmeHost}" = mkLocalProxyHost 2283;
             "satellite.${acmeHost}" = mkLocalProxyHost 6333;
             "search.${acmeHost}" = mkLocalProxyHost 7114;

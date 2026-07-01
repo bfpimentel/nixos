@@ -9,15 +9,15 @@ alignment = "left"
 type = "session"
 style = "plain"
 foreground_templates = [
-  "{{ if .SSHSession }}#7FBBB3{{ end }}",
-  "{{ if not .SSHSession }}#83C092{{ end }}",
+  "{{ if .SSHSession }}#7DAEA3{{ end }}",
+  "{{ if not .SSHSession }}#89B482{{ end }}",
 ]
 template = "{{ .HostName }}{{ if .SSHSession }} [ssh]{{ end }}"
 
 [[blocks.segments]]
 type = "path"
 style = "plain"
-foreground = "#DBBC7F"
+foreground = "#D8A657"
 template = " {{ .Path }}"
 
 [blocks.segments.properties]
@@ -26,7 +26,7 @@ style = "folder"
 [[blocks.segments]]
 type = "git"
 style = "plain"
-foreground = "#E69875"
+foreground = "#E78A4E"
 template = " [{{ .HEAD }}]"
 
 [blocks.segments.properties]
@@ -36,7 +36,7 @@ fetch_status = false
 [[blocks.segments]]
 type = "text"
 style = "plain"
-foreground = "#D699B6"
+foreground = "#D3869B"
 template = "{{ if .Env.DIRENV_DIR }} [dev]{{ end }}"
 
 [[blocks]]
@@ -47,5 +47,5 @@ newline = true
 [[blocks.segments]]
 type = "text"
 style = "plain"
-foreground = "#D3C6AA"
+foreground = "#D4BE98"
 template = "$ "

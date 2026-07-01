@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/tui.json",
-  "theme": "system",
+  "theme": "gruvbox",
   "keybinds": {
     "editor_open": "ctrl+e"
   }

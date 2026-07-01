@@ -17,7 +17,7 @@
 
         virtualisation.oci-containers.containers = {
           immich-server = {
-            image = "ghcr.io/immich-app/immich-server:v2";
+            image = "ghcr.io/immich-app/immich-server:v3";
             pull = "always";
             autoStart = true;
             dependsOn = [
@@ -38,7 +38,7 @@
           };
 
           immich-machine-learning = {
-            image = "ghcr.io/immich-app/immich-machine-learning:v2";
+            image = "ghcr.io/immich-app/immich-machine-learning:v3";
             pull = "always";
             autoStart = true;
             environmentFiles = [ config.age.secrets.immich-env.path ];
@@ -52,9 +52,12 @@
           };
 
           immich-postgres = {
-            image = "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23";
+            image = "ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0";
             pull = "always";
             autoStart = true;
+            extraOptions = [
+              "--shm-size=128mb"
+            ];
             environmentFiles = [ config.age.secrets.immich-env.path ];
             volumes = [ "/mnt/mass/containers/immich/postgres:/var/lib/postgresql/data" ];
           };

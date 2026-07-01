@@ -29,7 +29,7 @@ let
       address = "10.64.0.11";
     })
     (mkClient {
-      publicKey = "VV955utmkqwcKpSBGDV8NCArKOxVOveKr60QUfr7IE4=";
+      publicKey = "nmRXqL2t7qsCBeNHyQH0GqWLqmOOkSwFFxyZjJ7FrGI=";
       address = "10.64.0.12";
     })
   ];

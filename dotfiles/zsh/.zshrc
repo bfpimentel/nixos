@@ -14,34 +14,16 @@ setopt HIST_REDUCE_BLANKS
 setopt HIST_SAVE_NO_DUPS
 setopt SHARE_HISTORY
 
-for file in $ZDOTDIR/conf.d/*.zsh(N); do
+for file in "$ZDOTDIR"/conf.d/*.zsh(N); do
     source "$file"
 done
 
-autoload -Uz compinit
-zmodload zsh/complist
-
 _zsh_cache_dir="$HOME/.cache/zsh"
-[[ -d "$_zsh_cache_dir" ]] || mkdir -p "$_zsh_cache_dir"
-compinit -d "$_zsh_cache_dir/.zcompdump-$ZSH_VERSION"
+[[ -d "$_zsh_cache_dir" ]] || mkdir -p -- "$_zsh_cache_dir"
 
-zstyle ':completion:*' menu no
-zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}'
-zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
-zstyle ':completion:*' verbose yes
-zstyle ':completion:*:descriptions' format '%F{#859289}%d%f'
-zstyle ':completion:*:messages' format '%F{#859289}%d%f'
-zstyle ':completion:*:warnings' format '%F{#e67e80}no matches found%f'
-zstyle ':fzf-tab:*' switch-group '<' '>'
-
-bindkey '^[[Z' reverse-menu-complete
-
-zsh_plugins_root="$ZDOTDIR/.zsh_plugins"
-zsh_plugins_txt="${zsh_plugins_root}.txt"
-zsh_plugins_bundle="${zsh_plugins_root}.zsh"
-oh_my_posh_bin="$(command -v oh-my-posh)"
+zsh_plugins_txt="$ZDOTDIR/.zsh_plugins.txt"
+zsh_plugins_bundle="$_zsh_cache_dir/plugins.zsh"
 antidote_zsh=""
-fzf_key_bindings_zsh=""
 
 for profile in "$HOME/.local" "$HOME/.nix-profile" "/etc/profiles/per-user/$USER" "/run/current-system/sw"; do
     if [[ -r "$profile/share/antidote/antidote.zsh" ]]; then
@@ -56,33 +38,61 @@ else
     print -u2 "zsh: antidote.zsh not found in Nix profiles"
 fi
 
-for profile in "$HOME/.local" "$HOME/.nix-profile" "/etc/profiles/per-user/$USER" "/run/current-system/sw"; do
-    if [[ -r "$profile/share/fzf/key-bindings.zsh" ]]; then
-        fzf_key_bindings_zsh="$profile/share/fzf/key-bindings.zsh"
-        break
-    fi
-done
-
-if [[ -n "$fzf_key_bindings_zsh" ]]; then
-    source "$fzf_key_bindings_zsh"
-else
-    print -u2 "zsh: fzf key bindings not found in Nix profiles"
-fi
-
 if [[ -n "$antidote_zsh" && -r "$zsh_plugins_txt" ]]; then
     if [[ ! -r "$zsh_plugins_bundle" || "$zsh_plugins_txt" -nt "$zsh_plugins_bundle" ]]; then
-        antidote bundle < "$zsh_plugins_txt" >| "$zsh_plugins_bundle"
+        zsh_plugins_tmp="${zsh_plugins_bundle}.$$"
+        if antidote bundle < "$zsh_plugins_txt" >| "$zsh_plugins_tmp"; then
+            mv -f -- "$zsh_plugins_tmp" "$zsh_plugins_bundle"
+        else
+            rm -f -- "$zsh_plugins_tmp"
+            print -u2 "zsh: failed to build Antidote plugin bundle"
+        fi
     fi
 
-    source "$zsh_plugins_bundle"
+    # zsh-completions must extend fpath before compinit scans it.
+    zsh_completions="$(antidote path zsh-users/zsh-completions 2>/dev/null)"
+    if [[ -r "$zsh_completions/zsh-completions.plugin.zsh" ]]; then
+        typeset -gU fpath FPATH
+        source "$zsh_completions/zsh-completions.plugin.zsh"
+    fi
 fi
 
-if [[ -n "$oh_my_posh_bin" ]]; then
+autoload -Uz compinit
+zmodload zsh/complist
+compinit -d "$_zsh_cache_dir/.zcompdump-$ZSH_VERSION"
+
+zstyle ':completion:*' menu no
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' verbose yes
+zstyle ':completion:*:descriptions' format '%F{#928374}%d%f'
+zstyle ':completion:*:messages' format '%F{#928374}%d%f'
+zstyle ':completion:*:warnings' format '%F{#ea6962}no matches found%f'
+zstyle ':fzf-tab:*' switch-group '<' '>'
+
+bindkey '^[[Z' reverse-menu-complete
+
+fzf_share="$(command fzf-share 2>/dev/null)"
+if [[ -t 0 && -t 1 && -r "$fzf_share/key-bindings.zsh" ]]; then
+    source "$fzf_share/key-bindings.zsh"
+elif ! command -v fzf >/dev/null; then
+    print -u2 "zsh: fzf not found in PATH"
+elif [[ -t 0 && -t 1 ]]; then
+    print -u2 "zsh: fzf key bindings not found"
+fi
+
+[[ -t 0 && -t 1 && -r "$zsh_plugins_bundle" ]] && source "$zsh_plugins_bundle"
+
+oh_my_posh_bin="$(command -v oh-my-posh)"
+if [[ -n "$oh_my_posh_bin" && -t 0 && -t 1 ]]; then
     eval "$("$oh_my_posh_bin" init zsh --config "$ZDOTDIR/bfmp.toml")"
-else
+elif [[ -z "$oh_my_posh_bin" ]]; then
     print -u2 "zsh: oh-my-posh not found in PATH"
 fi
 
-if [[ "$(uname -s)" == "Darwin" ]]; then
-    eval "$(direnv hook zsh)"
+if command -v direnv >/dev/null; then
+    eval "$(command direnv hook zsh)"
 fi
+
+unset antidote_zsh fzf_share oh_my_posh_bin profile zsh_completions
+unset zsh_plugins_bundle zsh_plugins_tmp zsh_plugins_txt

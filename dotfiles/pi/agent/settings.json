@@ -1,10 +1,10 @@
 {
-  "lastChangelogVersion": "0.80.2",
+  "lastChangelogVersion": "0.80.10",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "low",
+  "defaultModel": "gpt-5.6-sol",
+  "defaultThinkingLevel": "medium",
   "shellPath": "/bin/zsh",
-  "theme": "everforest",
+  "theme": "gruvbox-material-soft",
   "enableInstallTelemetry": false,
   "hideThinkingBlock": true,
   "editorPaddingX": 1,
@@ -16,6 +16,7 @@
   },
   "packages": [
     "git:github.com/code-yeongyu/pi-apply-patch",
-    "npm:pi-mcp-adapter"
+    "npm:pi-mcp-adapter",
+    "npm:pi-zentui"
   ]
 }

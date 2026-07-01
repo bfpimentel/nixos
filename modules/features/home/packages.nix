@@ -6,8 +6,6 @@
       { pkgs, util, ... }:
       {
         home.packages = with pkgs; [
-          nh
-
           bun
           nodejs_22
 
@@ -36,58 +34,123 @@
     (
       { pkgs, ... }:
       let
+        androidComposition = pkgs.androidenv.composeAndroidPackages {
+          platformVersions = [
+            "latest"
+            "36"
+            "35"
+          ];
+          buildToolsVersions = [
+            "latest"
+            "36.0.0"
+            "35.0.0"
+          ];
+          includeEmulator = false;
+          includeSystemImages = false;
+          includeCmake = true;
+          cmakeVersions = [ "3.22.1" ];
+          includeNDK = true;
+          ndkVersions = [ "27.1.12297006" ];
+        };
+        androidSdk = androidComposition.androidsdk;
+
+        mocker = pkgs.stdenvNoCC.mkDerivation rec {
+          pname = "mocker";
+          version = "0.7.2";
+
+          src = pkgs.fetchurl {
+            url = "https://github.com/us/mocker/releases/download/v${version}/mocker-v${version}-arm64-apple-macosx.tar.gz";
+            hash = "sha256-XAF7WUvR2v9+2Am9QnZ53BFi4KMCrdYopZh4pjdIBMU=";
+          };
+
+          sourceRoot = ".";
+
+          installPhase = ''
+            runHook preInstall
+            install -Dm755 mocker $out/bin/mocker
+            runHook postInstall
+          '';
+
+          meta = {
+            description = "Docker-compatible container CLI built on Apple's Containerization framework";
+            homepage = "https://github.com/us/mocker";
+            license = pkgs.lib.licenses.mit;
+            mainProgram = "mocker";
+            platforms = [ "aarch64-darwin" ];
+          };
+        };
+
         casks = with pkgs.brewCasks; [
-          altserver
           bettercapture
           bruno
           codex-app
+          crossover
           ghostty
           helium-browser
           hiddenbar
-          kitty
+          openusage
           pearcleaner
           shottr
           the-unarchiver
           vial
           xcodes-app
 
-          (anydesk.overrideAttrs (oldAttrs: {
-            src = pkgs.fetchurl {
-              url = builtins.head oldAttrs.src.urls;
-              hash = "sha256-6BApi8XV8T+Th4jOejQqfN0Sz/EF7HNHUtXC9O5egCI=";
-            };
-          }))
-          (ankerwork.overrideAttrs (oldAttrs: {
-            src = pkgs.fetchurl {
-              url = builtins.head oldAttrs.src.urls;
-              hash = "sha256-1Wo7ZPJdrsf01NQbQsFAh+kCRJSexSC/vX3vyy+qFD0=";
+          (aerospace.overrideAttrs (oldAttrs: {
+            # brew-nix uses the cask artifact path as the destination, which
+            # leaves the app nested under AeroSpace-vX.Y.Z. Install the bundle
+            # directly under Applications instead, while retaining the CLI.
+            installPhase = ''
+              runHook preInstall
+
+              mkdir -p $out/Applications/AeroSpace.app $out/bin
+              cp -R . $out/Applications/AeroSpace.app/
+              install -m755 ../bin/aerospace $out/bin/aerospace
+
+              runHook postInstall
+            '';
+
+            meta = oldAttrs.meta // {
+              mainProgram = "aerospace";
             };
           }))
         ];
       in
       {
-        home.packages =
-          with pkgs;
-          [
-            inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
-            inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.herdr
+        home = {
+          packages =
+            with pkgs;
+            [
+              pi-coding-agent
 
-            aerospace
-            jankyborders
+              # inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.pi
+              inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.opencode
+              inputs.herdr.packages.${pkgs.stdenv.hostPlatform.system}.herdr
 
-            tmux
-            rsync
-            direnv
-            pnpm
+              nh
 
-            # podman
-            # podman-compose
+              jankyborders
 
-            nerd-fonts.symbols-only
-            nerd-fonts.victor-mono
-            nerd-fonts.iosevka
-          ]
-          ++ casks;
+              tmux
+              rsync
+              direnv
+              pnpm
+              (python3.withPackages (pythonPackages: [ pythonPackages.pexpect ]))
+
+              container
+              mocker
+              # podman
+              # podman-compose
+
+              cocoapods
+              androidSdk
+              jdk
+
+              nerd-fonts.symbols-only
+              nerd-fonts.iosevka
+            ]
+            ++ casks;
+
+        };
       }
     )
   ];

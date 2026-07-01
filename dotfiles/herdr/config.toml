@@ -1,11 +1,16 @@
 onboarding = false
 
 [theme]
-name = "catppuccin"
+name = "gruvbox"
 auto_switch = false
 
 [theme.custom]
 panel_bg = "reset"
+accent = "#a9b665"
+green = "#a9b665"
+blue = "#7daea3"
+red = "#ea6962"
+yellow = "#d8a657"
 
 [terminal]
 new_cwd = "follow"
@@ -31,8 +36,8 @@ toggle_sidebar = "prefix+b"
 # Tabs
 new_tab = "prefix+c"
 rename_tab = "prefix+comma"
-previous_tab = "prefix+p"
-next_tab = "prefix+n"
+previous_tab = "prefix+h"
+next_tab = "prefix+l"
 switch_tab = "prefix+1..9"
 edit_scrollback = "prefix+e"
 # close_tab = "prefix+shift+x"
@@ -43,6 +48,10 @@ split_vertical = "prefix+|"
 split_horizontal = "prefix+/"
 close_pane = "prefix+x"
 resize_mode = "prefix+shift+r"
+navigate_pane_left = ""
+navigate_pane_down = ""
+navigate_pane_up = ""
+navigate_pane_right = ""
 
 # Workspaces
 new_workspace = "prefix+shift+n"
@@ -50,25 +59,8 @@ rename_workspace = "prefix+shift+w"
 close_workspace = "prefix+shift+x"
 previous_workspace = "prefix+shift+h"
 next_workspace = "prefix+shift+l"
-
-# switch_workspace = ""   # optional indexed binding, e.g. "prefix+shift+1..9"
-# rename_pane = "prefix+shift+p"
-# focus_pane_left = "ctrl+h"
-# focus_pane_down = "ctrl+j"
-# focus_pane_up = "ctrl+k"
-# focus_pane_right = "ctrl+l"
-# cycle_pane_next = "prefix+tab"
-# cycle_pane_previous = "prefix+shift+tab"
-# last_pane = ""          # optional, unset by default; bind e.g. "prefix+tab" for global back-and-forth
-
-# Navigate-mode movement. These local shortcuts win while navigate mode is open.
-# They are independent from focus_pane_*. Do not include prefix+, esc, enter, tab, or 1..9 here.
-# navigate_workspace_up = "up"
-# navigate_workspace_down = "down"
-# navigate_pane_left = "h"      # left arrow always focuses the pane to the left
-# navigate_pane_down = "j"
-# navigate_pane_up = "k"
-# navigate_pane_right = "l"     # right arrow always focuses the pane to the right
+# navigate_workspace_up = "k"
+# navigate_workspace_down = "j"
 
 [[keys.command]]
 key = "ctrl+h"

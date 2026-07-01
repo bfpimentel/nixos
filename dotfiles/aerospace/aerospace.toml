@@ -2,6 +2,8 @@ config-version = 2
 
 start-at-login = true
 
+auto-reload-config = true
+
 key-mapping.preset = 'qwerty'
 
 enable-normalization-flatten-containers = true
@@ -34,10 +36,10 @@ T = [ 'secondary', 'main' ]
 X = [ 'secondary', 'main' ]
 
 [gaps]
-outer.top =        8
-outer.bottom =     8
-outer.left =       8
-outer.right =      8
+outer.top =        0
+outer.bottom =     0
+outer.left =       0
+outer.right =      0
 inner.horizontal = 8
 inner.vertical =   8
 
@@ -82,12 +84,17 @@ equal = 'resize smart +50'
 [[on-window-detected]]
 if.app-id = 'com.apple.finder'
 run = ['layout floating']
-check-further-callbacks = true
+check-further-callbacks = false
+
+[[on-window-detected]]
+if.app-id = 'cc.ffitch.shottr'
+run = ['layout floating']
+check-further-callbacks = false
 
 [[on-window-detected]]
 if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace T']
-check-further-callbacks = true
+check-further-callbacks = false
 
 [[on-window-detected]]
 if.window-title-regex-substring = 'Helium - Bruno'
@@ -103,10 +110,10 @@ check-further-callbacks = true
 if.app-id = 'net.imput.helium'
 if.window-title-regex-substring = 'Picture in Picture'
 run = ['layout floating']
-check-further-callbacks = true
+check-further-callbacks = false
 
 [[on-window-detected]]
 if.app-id = 'net.imput.helium'
 if.window-title-regex-substring = 'Bitwarden'
 run = ['layout floating']
-check-further-callbacks = true
+check-further-callbacks = false

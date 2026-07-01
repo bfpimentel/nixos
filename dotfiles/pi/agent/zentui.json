@@ -1,0 +1,68 @@
+{
+  "projectRefreshIntervalMs": 30000,
+  "icons": {
+    "cwd": "󰝰",
+    "git": "",
+    "ahead": "↑",
+    "behind": "↓",
+    "diverged": "⇕",
+    "conflicted": "=",
+    "untracked": "?",
+    "stashed": "$",
+    "modified": "!",
+    "staged": "+",
+    "renamed": "»",
+    "deleted": "✘",
+    "typechanged": "T",
+    "cacheHit": "󰆼",
+    "editorPrompt": ""
+  },
+  "colors": {
+    "cwd": "bold cyan",
+    "gitBranch": "bold purple",
+    "gitStatus": "bold red",
+    "contextNormal": "bright-black",
+    "contextWarning": "bold yellow",
+    "contextError": "bold red",
+    "tokens": "bright-black",
+    "cost": "bold green",
+    "extensionStatus": "bright-black",
+    "separator": "bright-black",
+    "runtimePrefix": "",
+    "editorAccent": "accent",
+    "editorPrompt": "accent",
+    "editorBorder": "borderMuted",
+    "editorModel": "accent",
+    "editorProvider": "text",
+    "editorThinking": "muted",
+    "editorThinkingMinimal": "thinkingMinimal",
+    "editorThinkingLow": "thinkingLow",
+    "editorThinkingMedium": "thinkingMedium",
+    "editorThinkingHigh": "thinkingHigh",
+    "editorThinkingXhigh": "thinkingXhigh"
+  },
+  "colorSources": {
+    "starship": "theme",
+    "editor": "theme",
+    "userMessages": "theme"
+  },
+  "features": {
+    "editor": true,
+    "statusLine": true,
+    "copyFriendly": false
+  },
+  "footerSegments": {
+    "cwd": true,
+    "gitBranch": true,
+    "gitStatus": true,
+    "runtime": true,
+    "context": true,
+    "tokens": true,
+    "cost": true
+  },
+  "extensionStatuses": {
+    "defaultPlacement": "right",
+    "placements": {},
+    "colorModes": {}
+  }
+}

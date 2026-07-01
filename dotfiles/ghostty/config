@@ -4,36 +4,15 @@ font-thicken = true
 font-thicken-strength = 125
 adjust-cell-height = 6
 
+theme = Gruvbox Material
+background = #32302f
+
 window-padding-x = 12
 window-padding-y = 8
 
-background = #000000
-foreground = #D8CAAC
-background-opacity = 0.70
-background-blur-radius = 10
+background-opacity = 0.60
+background-blur-radius = 20
 macos-titlebar-style = hidden
-
-cursor-color = #D8CAAC
-
-selection-foreground = #D8CAAC
-selection-background = #505A60
-
-palette = 0=#3C474D
-palette = 1=#E68183
-palette = 2=#A7C080
-palette = 3=#D9BB80
-palette = 4=#83B6AF
-palette = 5=#D39BB6
-palette = 6=#87C095
-palette = 7=#868D80
-palette = 8=#868D80
-palette = 9=#E68183
-palette = 10=#A7C080
-palette = 11=#D9BB80
-palette = 12=#83B6AF
-palette = 13=#D39BB6
-palette = 14=#87C095
-palette = 15=#868D80
 
 copy-on-select = clipboard
 shell-integration = detect

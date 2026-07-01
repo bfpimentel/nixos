@@ -16,7 +16,17 @@
 
         time.timeZone = "America/Sao_Paulo";
 
-        programs.nix-ld.enable = true;
+        programs = {
+          nh = {
+            enable = true;
+            clean = {
+              enable = true;
+              extraArgs = "--keep 5";
+            };
+          };
+
+          nix-ld.enable = true;
+        };
       }
     )
   ];

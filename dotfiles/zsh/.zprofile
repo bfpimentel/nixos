@@ -1,11 +1,8 @@
-export TMPDIR="/tmp"
 export TMUXDIR="$XDG_CONFIG_HOME/tmux"
 
 export VISUAL="nvim"
 export EDITOR="$VISUAL"
-export MANPAGE="nvim +Man!"
-
-export DOCKER_HOST="unix:///tmp/podman/podman-machine-default-api.sock"
+export MANPAGER="nvim +Man!"
 
 typeset -gU path PATH
 path=(
@@ -14,7 +11,8 @@ path=(
     $path
 )
 
-if [[ "$(uname -s)" == "Darwin" ]]; then
+if [[ "$OSTYPE" == darwin* ]]; then
+    export DOCKER_HOST="unix:///tmp/podman/podman-machine-default-api.sock"
     export PI_CODING_AGENT_DIR="$HOME/.config/pi/agent"
 
     path=(

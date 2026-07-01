@@ -23,6 +23,9 @@ end
 local function setup_mini_files()
   local MiniFiles = require("mini.files")
   MiniFiles.setup({
+    mappings = {
+      mark_set = "<localleader>m",
+    },
     windows = {
       max_number = 3,
       preview = false,

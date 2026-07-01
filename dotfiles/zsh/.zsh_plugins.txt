@@ -1,4 +1,4 @@
 zsh-users/zsh-autosuggestions
 zsh-users/zsh-completions
-zsh-users/zsh-syntax-highlighting
 Aloxaf/fzf-tab
+zsh-users/zsh-syntax-highlighting
