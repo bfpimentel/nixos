@@ -64,9 +64,10 @@ in
             "dash.${acmeHost}" = mkLocalProxyHost 7112;
             "dav.${acmeHost}" = mkLocalProxyHost 7116;
             "drip.${acmeHost}" = mkLocalProxyHost 7123;
+            "gleb-server.${acmeHost}" = mkLocalProxyHost 9001;
+            "gleb.${acmeHost}" = mkLocalProxyHost 9000;
             "hass-sync.${acmeHost}" = mkLocalProxyHost 8334;
             "hass.${acmeHost}" = mkLocalProxyHost 8333;
-            "hermes.${acmeHost}" = mkLocalProxyHost 9119;
             "jobs.${acmeHost}" = mkLocalProxyHost 3005;
             "logs.${acmeHost}" = mkLocalProxyHost 7113;
             "media.${acmeHost}" = mkLocalProxyHost 8096;

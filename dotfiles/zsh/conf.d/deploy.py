@@ -10,9 +10,13 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import TextIO
+from typing import Callable, TextIO
 
 import pexpect
+from rich.text import Text
+from textual.app import App, ComposeResult
+from textual.events import Key
+from textual.widgets import RichLog, Static
 
 
 VALID_TARGETS = ("powers", "thronos")
@@ -28,7 +32,14 @@ PALETTE = {
 
 
 class Deployment:
-    def __init__(self, repo: Path, targets: list[str]) -> None:
+    def __init__(
+        self,
+        repo: Path,
+        targets: list[str],
+        *,
+        render_callback: Callable[[str], None] | None = None,
+        log_callback: Callable[[str], None] | None = None,
+    ) -> None:
         self.repo = repo
         self.targets = targets
         self.states = dict.fromkeys(targets, "pending")
@@ -37,6 +48,8 @@ class Deployment:
         self.current_state = ""
         self.password: str | None = None
         self.color = sys.stdout.isatty() and "NO_COLOR" not in os.environ
+        self.render_callback = render_callback
+        self.log_callback = log_callback
 
     def paint(self, text: str, color: str, *, bold: bool = False) -> str:
         if not self.color:
@@ -60,16 +73,15 @@ class Deployment:
         return self.paint(prefix + "─" * (width - len(prefix) - 1) + "┤", "muted")
 
     def render(self) -> None:
-        if sys.stdout.isatty():
-            print("\033[2J\033[H", end="")
-
         columns = shutil.get_terminal_size((80, 24)).columns
         title = " NIXOS // FLEET DEPLOY "
         width = max(len(title) + 3, min(columns - 2, 78))
         top = f"╭─{title}{'─' * (width - len(title) - 3)}╮"
-        print(self.paint(top, "teal", bold=True))
-        print(self.box_line(str(self.repo), width, color="blue"))
-        print(self.divider("HOSTS", width))
+        lines = [
+            self.paint(top, "teal", bold=True),
+            self.box_line(str(self.repo), width, color="blue"),
+            self.divider("HOSTS", width),
+        ]
 
         markers = {
             "pending": ("○", "queued", "muted"),
@@ -79,7 +91,7 @@ class Deployment:
         }
         for target in self.targets:
             marker, label, color = markers[self.states[target]]
-            print(
+            lines.append(
                 self.box_line(
                     f"{marker}  {target.ljust(16)} {label.upper()}",
                     width,
@@ -89,7 +101,7 @@ class Deployment:
             )
 
         if self.current_step:
-            print(self.divider("ACTIVE", width))
+            lines.append(self.divider("ACTIVE", width))
             stages = ("CONNECT", "SYNC", "SWITCH", "DONE")
             stage_index = {
                 "prepare remote": 0,
@@ -109,18 +121,25 @@ class Deployment:
                 if self.current_state in {"done", "ok"}
                 else "yellow"
             )
-            print(self.box_line(track, width, color=active_color))
+            lines.append(self.box_line(track, width, color=active_color))
             detail = (
                 "fleet :: all deployments completed"
                 if self.current_step == "all deployments completed"
                 else f"{self.host} :: {self.current_step} [{self.current_state}]"
             )
-            print(self.box_line(detail, width, color=active_color, bold=True))
+            lines.append(self.box_line(detail, width, color=active_color, bold=True))
 
         complete = sum(state == "done" for state in self.states.values())
         footer = f"{complete}/{len(self.targets)} hosts complete"
         bottom = f"╰─ {footer} {'─' * (width - len(footer) - 5)}╯"
-        print(self.paint(bottom, "teal"))
+        lines.append(self.paint(bottom, "teal"))
+        output = "\n".join(lines)
+        if self.render_callback:
+            self.render_callback(output)
+        else:
+            if sys.stdout.isatty():
+                print("\033[2J\033[H", end="")
+            print(output)
 
     def step(self, label: str, state: str) -> None:
         self.current_step = label
@@ -130,27 +149,37 @@ class Deployment:
     def report_failure(self, label: str, log: TextIO) -> None:
         self.states[self.host] = "failed"
         self.step(label, "failed")
-        log.seek(0)
-        print(f"\n---- {self.host} :: {label} log ----", file=sys.stderr)
-        print(log.read(), end="", file=sys.stderr)
-        print("---- end log ----", file=sys.stderr)
+        if self.log_callback:
+            self.log_callback(f"\n---- {self.host} :: {label} failed ----\n")
+        else:
+            log.seek(0)
+            print(f"\n---- {self.host} :: {label} log ----", file=sys.stderr)
+            print(log.read(), end="", file=sys.stderr)
+            print("---- end log ----", file=sys.stderr)
 
     def write_rebuild_log(self, log: TextIO, output: str) -> None:
         if self.password:
             output = output.replace(self.password, "[redacted]")
         log.write(output)
+        log.flush()
+        if self.log_callback:
+            self.log_callback(output)
 
     def run_quiet(self, label: str, command: list[str]) -> bool:
         self.step(label, "running")
         with tempfile.TemporaryFile(mode="w+t", encoding="utf-8") as log:
-            result = subprocess.run(
+            result = subprocess.Popen(
                 command,
-                stdout=log,
+                stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
-                check=False,
+                bufsize=1,
             )
-            if result.returncode != 0:
+            assert result.stdout is not None
+            for output in result.stdout:
+                self.write_rebuild_log(log, output)
+            returncode = result.wait()
+            if returncode != 0:
                 self.report_failure(label, log)
                 return False
 
@@ -187,11 +216,11 @@ class Deployment:
                 codec_errors="replace",
                 timeout=None,
             )
+            child.logfile_read = RebuildLog(self, log)
 
             try:
                 while True:
                     match = child.expect([SUDO_PROMPT, pexpect.EOF])
-                    self.write_rebuild_log(log, child.before)
                     if match == 1:
                         break
                     child.sendline(self.password)
@@ -251,6 +280,104 @@ class Deployment:
         return 0
 
 
+class RebuildLog:
+    def __init__(self, deployment: Deployment, log: TextIO) -> None:
+        self.deployment = deployment
+        self.log = log
+
+    def write(self, output: str) -> None:
+        self.deployment.write_rebuild_log(self.log, output)
+
+    def flush(self) -> None:
+        self.log.flush()
+
+
+class DeploymentApp(App[int]):
+    CSS = """
+    Screen {
+        layout: vertical;
+        background: transparent;
+    }
+
+    #dashboard {
+        height: auto;
+        padding: 0 1;
+    }
+
+    #logs {
+        height: 1fr;
+        margin: 1 1 0 1;
+        border: round #928374;
+        background: transparent;
+        color: #d4be98;
+        scrollbar-color: #7daea3;
+        scrollbar-color-hover: #89b482;
+        scrollbar-color-active: #a9b665;
+    }
+    """
+
+    def __init__(self, repo: Path, targets: list[str], password: str) -> None:
+        super().__init__()
+        self.deployment_result = 0
+        self.deployment_finished = False
+        self.log_buffer = ""
+        self.deployment = Deployment(
+            repo,
+            targets,
+            render_callback=self.render_dashboard,
+            log_callback=self.write_log,
+        )
+        self.deployment.password = password
+
+    def compose(self) -> ComposeResult:
+        yield Static(id="dashboard")
+        yield RichLog(id="logs", wrap=True, highlight=False, markup=False)
+
+    def on_mount(self) -> None:
+        logs = self.query_one("#logs", RichLog)
+        logs.border_title = "LIVE LOG"
+        logs.focus()
+        self.run_worker(self.deploy, thread=True)
+
+    def render_dashboard(self, output: str) -> None:
+        self.call_from_thread(
+            self.query_one("#dashboard", Static).update, Text.from_ansi(output)
+        )
+
+    def write_log(self, output: str) -> None:
+        self.call_from_thread(self.append_log, output)
+
+    def append_log(self, output: str, *, flush: bool = False) -> None:
+        self.log_buffer += output.replace("\r\n", "\n").replace("\r", "\n")
+        lines = self.log_buffer.split("\n")
+        self.log_buffer = "" if flush else lines.pop()
+        if flush and self.log_buffer:
+            lines.append(self.log_buffer)
+            self.log_buffer = ""
+
+        logs = self.query_one("#logs", RichLog)
+        for line in lines:
+            rendered = Text.from_ansi(line)
+            if rendered.plain.strip():
+                logs.write(rendered)
+
+    def deploy(self) -> None:
+        self.call_from_thread(self.finish_deployment, self.deployment.run())
+
+    def finish_deployment(self, result: int) -> None:
+        self.deployment_result = result
+        self.deployment_finished = True
+        self.append_log("", flush=True)
+        logs = self.query_one("#logs", RichLog)
+        logs.border_title = "DEPLOYMENT FINISHED"
+        logs.write(Text("Press any key to exit", style="bold #d8a657"))
+
+    def on_key(self, event: Key) -> None:
+        if self.deployment_finished:
+            event.stop()
+            self.exit(self.deployment_result)
+
+
 def main() -> int:
     targets = sys.argv[1:] or list(VALID_TARGETS)
     unknown = [target for target in targets if target not in VALID_TARGETS]
@@ -260,6 +387,10 @@ def main() -> int:
         return 1
 
     repo = Path(os.environ.get("DOTFILES", Path.home() / ".dotfiles")).expanduser()
+    if sys.stdin.isatty() and sys.stdout.isatty():
+        password = getpass.getpass("sudo password for remote hosts: ")
+        result = DeploymentApp(repo, targets, password).run()
+        return result or 0
     return Deployment(repo, targets).run()
 
 

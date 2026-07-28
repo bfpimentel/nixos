@@ -13,12 +13,13 @@ in
   "restic-password.age".publicKeys = [ bruno ];
 
   # Containers
-  "ghcr-token.age".publicKeys = [ bruno ];
   "bap-env.age".publicKeys = [ bruno ];
+  "ghcr-token.age".publicKeys = [ bruno ];
+  "gleb-env.age".publicKeys = [ bruno ];
+  "hass-env.age".publicKeys = [ bruno ];
   "immich-env.age".publicKeys = [ bruno ];
   "n8n-env.age".publicKeys = [ bruno ];
   "searxng-env.age".publicKeys = [ bruno ];
-  "hass-env.age".publicKeys = [ bruno ];
 
   # Hermes
   "hermes-env.age".publicKeys = [ bruno ];

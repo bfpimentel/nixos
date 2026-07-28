@@ -74,6 +74,11 @@
             owner = "bruno";
             group = "bruno";
           };
+          gleb-env = {
+            file = ../../../secrets/gleb-env.age;
+            owner = "bruno";
+            group = "bruno";
+          };
           hermes-env = {
             file = ../../../secrets/hermes-env.age;
             owner = "bruno";

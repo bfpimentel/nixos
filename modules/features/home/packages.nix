@@ -54,32 +54,6 @@
         };
         androidSdk = androidComposition.androidsdk;
 
-        mocker = pkgs.stdenvNoCC.mkDerivation rec {
-          pname = "mocker";
-          version = "0.7.2";
-
-          src = pkgs.fetchurl {
-            url = "https://github.com/us/mocker/releases/download/v${version}/mocker-v${version}-arm64-apple-macosx.tar.gz";
-            hash = "sha256-XAF7WUvR2v9+2Am9QnZ53BFi4KMCrdYopZh4pjdIBMU=";
-          };
-
-          sourceRoot = ".";
-
-          installPhase = ''
-            runHook preInstall
-            install -Dm755 mocker $out/bin/mocker
-            runHook postInstall
-          '';
-
-          meta = {
-            description = "Docker-compatible container CLI built on Apple's Containerization framework";
-            homepage = "https://github.com/us/mocker";
-            license = pkgs.lib.licenses.mit;
-            mainProgram = "mocker";
-            platforms = [ "aarch64-darwin" ];
-          };
-        };
-
         casks = with pkgs.brewCasks; [
           bettercapture
           bruno
@@ -134,12 +108,13 @@
               rsync
               direnv
               pnpm
-              (python3.withPackages (pythonPackages: [ pythonPackages.pexpect ]))
+              (python3.withPackages (pythonPackages: [
+                pythonPackages.pexpect
+                pythonPackages.textual
+              ]))
 
-              container
-              mocker
-              # podman
-              # podman-compose
+              podman
+              podman-compose
 
               cocoapods
               androidSdk
