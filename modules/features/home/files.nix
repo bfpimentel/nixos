@@ -26,7 +26,6 @@
         // mapDotfiles ([
           "git"
           "ghostty"
-          "kitty"
           "lazygit"
           "nvim"
           "opencode"

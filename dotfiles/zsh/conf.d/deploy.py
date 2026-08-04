@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import getpass
 import os
 import re
@@ -37,11 +38,13 @@ class Deployment:
         repo: Path,
         targets: list[str],
         *,
+        remote_build: bool = False,
         render_callback: Callable[[str], None] | None = None,
         log_callback: Callable[[str], None] | None = None,
     ) -> None:
         self.repo = repo
         self.targets = targets
+        self.remote_build = remote_build
         self.states = dict.fromkeys(targets, "pending")
         self.host = ""
         self.current_step = ""
@@ -80,6 +83,13 @@ class Deployment:
         lines = [
             self.paint(top, "teal", bold=True),
             self.box_line(str(self.repo), width, color="blue"),
+            self.box_line(
+                "build :: remote host"
+                if self.remote_build
+                else "build :: local native Linux builder",
+                width,
+                color="blue",
+            ),
             self.divider("HOSTS", width),
         ]
 
@@ -102,14 +112,22 @@ class Deployment:
 
         if self.current_step:
             lines.append(self.divider("ACTIVE", width))
-            stages = ("CONNECT", "SYNC", "SWITCH", "DONE")
-            stage_index = {
-                "prepare remote": 0,
-                "rsync dotfiles": 1,
-                "nixos-rebuild switch": 2,
-                "complete": 3,
-                "all deployments completed": 3,
-            }.get(self.current_step, 0)
+            if self.remote_build:
+                stages = ("CONNECT", "SYNC", "SWITCH", "DONE")
+                stage_index = {
+                    "prepare remote": 0,
+                    "rsync dotfiles": 1,
+                    "nixos-rebuild switch": 2,
+                    "complete": 3,
+                    "all deployments completed": 3,
+                }.get(self.current_step, 0)
+            else:
+                stages = ("BUILD + SWITCH", "DONE")
+                stage_index = {
+                    "nixos-rebuild switch": 0,
+                    "complete": 1,
+                    "all deployments completed": 1,
+                }.get(self.current_step, 0)
             track = " ── ".join(
                 f"{'●' if index < stage_index else '◆' if index == stage_index else '○'} {stage}"
                 for index, stage in enumerate(stages)
@@ -194,15 +212,17 @@ class Deployment:
             "nixpkgs#nixos-rebuild",
             "--",
             "switch",
+            "--no-reexec",
             "--flake",
             f"{self.repo}#{self.host}",
             "--target-host",
             self.host,
-            "--build-host",
-            self.host,
-            "--sudo",
-            "--ask-sudo-password",
         ]
+
+        if self.remote_build:
+            command.extend(["--build-host", self.host])
+
+        command.extend(["--sudo", "--ask-sudo-password"])
 
         if self.password is None:
             self.password = getpass.getpass("sudo password for remote hosts: ")
@@ -246,24 +266,26 @@ class Deployment:
                 self.host = host
                 self.states[host] = "running"
 
-                if not self.run_quiet(
-                    "prepare remote", ["ssh", host, "mkdir -p ~/.dotfiles"]
-                ):
-                    return 1
+                if self.remote_build:
+                    if not self.run_quiet(
+                        "prepare remote", ["ssh", host, "mkdir -p ~/.dotfiles"]
+                    ):
+                        return 1
 
-                if not self.run_quiet(
-                    "rsync dotfiles",
-                    [
-                        "rsync",
-                        "-az",
-                        "--delete",
-                        "--filter=:- .gitignore",
-                        "--exclude=.git/",
-                        f"{self.repo}/",
-                        f"{host}:~/.dotfiles/",
-                    ],
-                ):
-                    return 1
+                    if not self.run_quiet(
+                        "rsync dotfiles",
+                        [
+                            "rsync",
+                            "-az",
+                            "--delete",
+                            "--filter=:- .gitignore",
+                            "--exclude=.git/",
+                            "--exclude=.cache/",
+                            f"{self.repo}/",
+                            f"{host}:~/.dotfiles/",
+                        ],
+                    ):
+                        return 1
 
                 self.step("nixos-rebuild switch", "running")
                 if not self.run_rebuild():
@@ -316,7 +338,9 @@ class DeploymentApp(App[int]):
     }
     """
 
-    def __init__(self, repo: Path, targets: list[str], password: str) -> None:
+    def __init__(
+        self, repo: Path, targets: list[str], password: str, *, remote_build: bool
+    ) -> None:
         super().__init__()
         self.deployment_result = 0
         self.deployment_finished = False
@@ -324,6 +348,7 @@ class DeploymentApp(App[int]):
         self.deployment = Deployment(
             repo,
             targets,
+            remote_build=remote_build,
             render_callback=self.render_dashboard,
             log_callback=self.write_log,
         )
@@ -379,19 +404,24 @@ class DeploymentApp(App[int]):
 
 
 def main() -> int:
-    targets = sys.argv[1:] or list(VALID_TARGETS)
-    unknown = [target for target in targets if target not in VALID_TARGETS]
-    if unknown:
-        print(f"unknown deploy target: {unknown[0]}", file=sys.stderr)
-        print(f"valid targets: {' '.join(VALID_TARGETS)}", file=sys.stderr)
-        return 1
+    parser = argparse.ArgumentParser(description="Deploy the NixOS fleet")
+    parser.add_argument(
+        "--remote-build",
+        action="store_true",
+        help="build on each target host instead of using the local Linux builder",
+    )
+    parser.add_argument("targets", nargs="*", choices=VALID_TARGETS)
+    args = parser.parse_args()
+    targets = args.targets or list(VALID_TARGETS)
 
     repo = Path(os.environ.get("DOTFILES", Path.home() / ".dotfiles")).expanduser()
     if sys.stdin.isatty() and sys.stdout.isatty():
         password = getpass.getpass("sudo password for remote hosts: ")
-        result = DeploymentApp(repo, targets, password).run()
+        result = DeploymentApp(
+            repo, targets, password, remote_build=args.remote_build
+        ).run()
         return result or 0
-    return Deployment(repo, targets).run()
+    return Deployment(repo, targets, remote_build=args.remote_build).run()
 
 
 if __name__ == "__main__":

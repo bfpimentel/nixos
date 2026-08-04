@@ -36,6 +36,25 @@ in
       };
     };
 
+    darwin = {
+      sharedModules = mkOption {
+        type = types.listOf types.deferredModule;
+        default = [ ];
+      };
+
+      hosts = mkOption {
+        type = types.attrsOf (
+          types.submodule {
+            options.modules = mkOption {
+              type = types.listOf types.deferredModule;
+              default = [ ];
+            };
+          }
+        );
+        default = { };
+      };
+    };
+
     nixos = {
       sharedModules = mkOption {
         type = types.listOf types.deferredModule;

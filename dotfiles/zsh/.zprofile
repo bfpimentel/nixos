@@ -6,6 +6,7 @@ export MANPAGER="nvim +Man!"
 
 typeset -gU path PATH
 path=(
+    "/etc/profiles/per-user/bruno/bin"
     "$HOME/.local/bin"
     "$HOME/.nix-profile/bin"
     $path

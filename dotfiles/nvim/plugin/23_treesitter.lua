@@ -22,7 +22,6 @@ Pack.later(function()
     "json",
     "json5",
     "jsx",
-    "kitty",
     "lua",
     "luadoc",
     "make",

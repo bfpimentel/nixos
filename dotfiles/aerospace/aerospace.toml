@@ -23,13 +23,13 @@ exec-on-workspace-change = [
 ]
 
 after-startup-command = [
-  'exec-and-forget /Users/bruno/.nix-profile/bin/borders'
+  'exec-and-forget /etc/profiles/per-user/bruno/bin/borders'
 ]
 
 persistent-workspaces = [ 'B', 'W', 'M', 'T', 'X' ]
 
 [exec.env-vars]
-PATH = '/Users/bruno/.nix-profile/bin/:${PATH}'
+PATH = '/etc/profiles/per-user/bruno/bin/:/Users/bruno/.nix-profile/bin/:${PATH}'
 
 [workspace-to-monitor-force-assignment]
 T = [ 'secondary', 'main' ]

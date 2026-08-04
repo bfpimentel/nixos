@@ -140,8 +140,6 @@
           bitwarden-cli
           mcporter
 
-          kitty
-
           hypridle
           hyprland
           hyprlock
@@ -189,6 +187,8 @@
       {
         home.packages = with pkgs; [
           zsh
+
+          ncdu
         ];
       }
     )

@@ -32,6 +32,28 @@ in
       )
     ) cfg.hm.hosts;
 
+    darwinConfigurations = lib.mapAttrs (
+      hostname: hostConfig:
+      let
+        homeHostConfig = cfg.hm.hosts.${hostname} or { modules = [ ]; };
+      in
+      inputs.nix-darwin.lib.darwinSystem {
+        modules = [
+          hmNixPkgsModule
+          inputs.home-manager.darwinModules.home-manager
+          {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              users.bruno.imports = cfg.hm.sharedModules ++ homeHostConfig.modules;
+            };
+          }
+        ]
+        ++ cfg.darwin.sharedModules
+        ++ hostConfig.modules;
+      }
+    ) cfg.darwin.hosts;
+
     nixosConfigurations = lib.mapAttrs (
       hostname: hostConfig:
       let

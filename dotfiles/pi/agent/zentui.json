@@ -15,7 +15,8 @@
     "deleted": "✘",
     "typechanged": "T",
     "cacheHit": "󰆼",
-    "editorPrompt": ""
+    "editorPrompt": "",
+    "mode": "auto"
   },
   "colors": {
     "cwd": "bold cyan",
@@ -42,9 +43,9 @@
     "editorThinkingXhigh": "thinkingXhigh"
   },
   "colorSources": {
-    "starship": "theme",
-    "editor": "theme",
-    "userMessages": "theme"
+    "starship": "terminal",
+    "editor": "terminal",
+    "userMessages": "terminal"
   },
   "features": {
     "editor": true,
@@ -54,15 +55,16 @@
   "footerSegments": {
     "cwd": true,
     "gitBranch": true,
-    "gitStatus": true,
-    "runtime": true,
-    "context": true,
-    "tokens": true,
+    "gitStatus": false,
+    "runtime": false,
+    "context": false,
+    "tokens": false,
     "cost": true
   },
   "extensionStatuses": {
     "defaultPlacement": "right",
     "placements": {},
     "colorModes": {}
-  }
+  },
+  "separator": "dot"
 }

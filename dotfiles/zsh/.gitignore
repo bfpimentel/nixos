@@ -1,5 +1,6 @@
 .zsh_history
 .zsh_sessions
 .zsh_plugins.zsh
+.zcompdump
 
 conf.d/secrets.zsh
