@@ -1,10 +1,7 @@
-{ lib, ... }:
+{ ... }:
 
-let
-  enabled = false;
-in
 {
-  config.bfmp.nixos.hosts.powers.modules = lib.optionals enabled [
+  config.bfmp.nixos.hosts.powers.modules = [
     (
       { config, pkgs, ... }:
       let
